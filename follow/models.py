@@ -1,7 +1,9 @@
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save, post_delete
+from django.conf import settings
+
 from follow.registry import model_map
 from follow.signals import followed, unfollowed
 import inspect
@@ -66,7 +68,7 @@ class Follow(models.Model):
     This model allows a user to follow any kind of object. The followed
     object is accessible through `Follow.target`.
     """
-    user = models.ForeignKey(User, related_name='following')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='following')
 
     datetime = models.DateTimeField(auto_now_add=True)
 
@@ -110,7 +112,7 @@ def unfollow_dispatch(sender, instance, **kwargs):
     # Unfollow handlers should be aware that both target and user can be `None`
     try:
         user = instance.user
-    except User.DoesNotExist:
+    except settings.get_user_model().DoesNotExist:
         user = None
     
     unfollowed.send(instance.target.__class__, user=user, target=instance.target, instance=instance)
