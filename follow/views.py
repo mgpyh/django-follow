@@ -13,7 +13,7 @@ def check(func):
             return HttpResponseBadRequest("Must be POST request.")
         follow = func(request, *args, **kwargs)
         if request.is_ajax():
-            return HttpResponse('ok')
+            return HttpResponse(follow.id and 1 or 0)
         try:
             if 'next' in request.GET:
                 return HttpResponseRedirect(request.GET.get('next'))
